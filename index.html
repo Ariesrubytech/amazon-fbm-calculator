@@ -1,0 +1,50 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Amazon FBM 利润计算器</title><style>
+:root{font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#203047;background:#f4f7fb}*{box-sizing:border-box}body{margin:0}.wrap{max-width:1120px;margin:auto;padding:30px 18px 70px}header{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;margin-bottom:24px}h1{font-size:27px;margin:0 0 7px}p{color:#65758b;margin:0;line-height:1.6}.pill{background:#e2f3ed;color:#167554;border-radius:30px;padding:9px 14px;font-size:13px}.layout{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{background:white;border:1px solid #e4eaf2;border-radius:18px;padding:24px;box-shadow:0 6px 24px #152b4810}.panel h2{font-size:17px;margin:0 0 18px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:15px}.field label{display:block;font-size:13px;font-weight:650;margin-bottom:7px}.field input,.field select{width:100%;border:1px solid #d9e2ee;border-radius:10px;padding:11px 12px;font:inherit;color:#24354b;background:white}.field small{display:block;color:#73839a;margin-top:5px;font-size:11px}.wide{grid-column:1/-1}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px}.metric{border-radius:13px;padding:17px;background:#f3f7fc}.metric span{display:block;color:#65758b;font-size:12px;margin-bottom:8px}.metric strong{font-size:25px;letter-spacing:-.5px}.metric.main{background:#e9f7f0}.metric.main strong{color:#08774f}.metric.bad{background:#fff0ee}.metric.bad strong{color:#bd4038}.note{font-size:12px;color:#718098;margin-top:15px;line-height:1.7}table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:11px 6px;border-bottom:1px solid #edf0f4;text-align:right}td:first-child,th:first-child{text-align:left}th{color:#697b91;font-weight:600}.full{grid-column:1/-1}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px}button{border:0;border-radius:10px;background:#2066c5;color:white;padding:11px 15px;font-weight:650;cursor:pointer}button.secondary{background:#e9eff8;color:#244c80}.status{font-size:13px;color:#63758b;margin-top:12px}.footer{font-size:12px;margin-top:18px;color:#718098}@media(max-width:760px){.layout{grid-template-columns:1fr}.fields{grid-template-columns:1fr 1fr}.panel{padding:18px}.metric strong{font-size:21px}}@media(max-width:390px){.fields{grid-template-columns:1fr}}
+</style></head><body><main class="wrap"><header><div><h1>Amazon FBM 利润计算器</h1><p>人民币成本 → 美元售价｜实时计算利润、盈亏平衡 ACOS 与广告预算</p></div><span class="pill">纯前端 · 数据仅保存在当前浏览器</span></header><div class="layout"><section class="panel"><h2>① 产品与成本</h2><div class="fields">
+<div class="field wide"><label for="name">产品名称</label><input id="name" type="text" value="120枝干花套装"></div>
+<div class="field"><label for="price">售价（USD）</label><input id="price" type="number" min="0" step="0.01" value="34.99"></div>
+<div class="field"><label for="rate">汇率（1 USD = CNY）</label><input id="rate" type="number" min="0.01" step="0.01" value="7.10"><small>手动填写，非实时汇率</small></div>
+<div class="field"><label for="purchase">采购成本（CNY）</label><input id="purchase" type="number" min="0" step="0.01" value="35"></div>
+<div class="field"><label for="shipping">国际运费（CNY）</label><input id="shipping" type="number" min="0" step="0.01" value="100"></div>
+<div class="field"><label for="packing">额外包装（CNY）</label><input id="packing" type="number" min="0" step="0.01" value="0"></div>
+<div class="field"><label for="otherRmb">其他人民币成本（CNY）</label><input id="otherRmb" type="number" min="0" step="0.01" value="0"></div>
+<div class="field"><label for="fee">平台佣金（%）</label><input id="fee" type="number" min="0" max="100" step="0.1" value="15"><small>按实际商品类目填写</small></div>
+<div class="field"><label for="fixed">其他美元费用（USD/单）</label><input id="fixed" type="number" min="0" step="0.01" value="0"><small>如每单固定费用等</small></div>
+<div class="field"><label for="acos">广告 ACOS（%）</label><input id="acos" type="number" min="0" step="0.1" value="15"></div>
+<div class="field"><label for="daily">广告日预算（USD）</label><input id="daily" type="number" min="0" step="0.01" value="5"></div>
+<div class="field"><label for="refund">退款损耗预留（销售额 %）</label><input id="refund" type="number" min="0" max="100" step="0.1" value="0"><small>简化预留，并非退款概率模型</small></div>
+<div class="field"><label for="target">目标净利润率（%）</label><input id="target" type="number" min="0" max="100" step="0.1" value="15"></div>
+</div><div class="toolbar"><button id="save">保存当前参数</button><button class="secondary" id="reset">恢复干花示例</button></div><div class="status" id="status" aria-live="polite"></div></section>
+<section class="panel"><h2>② 单件利润结果</h2><div class="metrics"><div class="metric main" id="profitBox"><span>广告后单件利润（USD）</span><strong id="profit">—</strong></div><div class="metric"><span>广告后利润（CNY）</span><strong id="profitRmb">—</strong></div><div class="metric"><span>广告后净利润率</span><strong id="margin">—</strong></div><div class="metric"><span>盈亏平衡 ACOS</span><strong id="breakAcos">—</strong></div><div class="metric"><span>不投广告保本售价</span><strong id="minPrice">—</strong></div><div class="metric"><span>达到目标净利率的售价</span><strong id="targetPrice">—</strong></div></div><h2 style="margin-top:24px">单件成本拆解（USD）</h2><table><tbody id="detail"></tbody></table><p class="note">盈亏平衡 ACOS = 广告前利润 ÷ 售价。目标售价按当前 ACOS、佣金和退款预留计算；若费率合计过高导致无解，则显示“无解”。不包含未填写的税费、仓储、退货处理等成本。</p></section>
+<section class="panel full"><h2>③ 售价情景对比</h2><div style="overflow-x:auto"><table><thead><tr><th>售价</th><th>广告前利润</th><th>广告费</th><th>广告后利润</th><th>净利润率</th><th>保本 ACOS</th></tr></thead><tbody id="scenarios"></tbody></table></div><div class="toolbar"><button id="export" class="secondary">导出价格对比 CSV</button></div></section>
+<section class="panel full"><h2>④ 广告预算测算</h2><div class="metrics"><div class="metric"><span>30天广告预算上限</span><strong id="monthly">—</strong></div><div class="metric"><span>目标 ACOS 下，花完预算所需广告销售额</span><strong id="sales">—</strong></div></div><p class="note">广告预算是上限，不代表实际一定花完；所需广告销售额只是预算÷ACOS的数学测算，不是销量预测。ACOS 为 0 时不计算该值。</p></section></div><p class="footer">本工具为经营测算，不自动读取亚马逊费率或汇率。浏览器本地保存仅适用于当前设备与浏览器；清理浏览器数据可能删除保存内容。</p></main><script>
+'use strict';
+const ids=['name','price','rate','purchase','shipping','packing','otherRmb','fee','fixed','acos','daily','refund','target'];
+const defaults={name:'120枝干花套装',price:34.99,rate:7.10,purchase:35,shipping:100,packing:0,otherRmb:0,fee:15,fixed:0,acos:15,daily:5,refund:0,target:15};
+const el=id=>document.getElementById(id);
+const money=n=>Number.isFinite(n)?'$'+n.toFixed(2):'无解';
+const pct=n=>Number.isFinite(n)?n.toFixed(1)+'%':'无解';
+const num=id=>{const n=Number(el(id).value);return Number.isFinite(n)?Math.max(0,n):0};
+let rows=[];
+function calculate(){
+ const p=num('price'),rate=Math.max(0.01,num('rate')),cost=(num('purchase')+num('shipping')+num('packing')+num('otherRmb'))/rate+num('fixed');
+ const fee=num('fee')/100,refund=num('refund')/100,acos=num('acos')/100,target=num('target')/100;
+ const before=p*(1-fee-refund)-cost,ad=p*acos,profit=before-ad,margin=p>0?profit/p*100:NaN,breakAcos=p>0?before/p*100:NaN;
+ el('profit').textContent=money(profit);el('profitRmb').textContent='¥'+(profit*rate).toFixed(2);el('margin').textContent=pct(margin);el('breakAcos').textContent=pct(breakAcos);
+ el('profitBox').className='metric '+(profit>=0?'main':'bad');
+ const floor=1-fee-refund,goal=floor-acos-target;
+ el('minPrice').textContent=floor>0?money(cost/floor):'无解';el('targetPrice').textContent=goal>0?money(cost/goal):'无解';
+ const detail=[['人民币成本折美元',cost-num('fixed')],['其他美元费用',num('fixed')],['平台佣金',p*fee],['退款损耗预留',p*refund],['广告费',ad],['广告前利润',before],['广告后利润',profit]];
+ el('detail').replaceChildren(...detail.map(([label,value])=>{const tr=document.createElement('tr');const a=document.createElement('td'),b=document.createElement('td');a.textContent=label;b.textContent=money(value);tr.append(a,b);return tr}));
+ const candidates=[24.99,29.99,32.99,34.99,39.99,p].filter((v,i,a)=>a.indexOf(v)===i).sort((a,b)=>a-b);
+ rows=candidates.map(v=>({price:v,before:v*floor-cost,ad:v*acos,profit:v*(floor-acos)-cost,margin:v>0?(v*(floor-acos)-cost)/v*100:NaN,break:v>0?(v*floor-cost)/v*100:NaN}));
+ el('scenarios').replaceChildren(...rows.map(x=>{const tr=document.createElement('tr');[money(x.price),money(x.before),money(x.ad),money(x.profit),pct(x.margin),pct(x.break)].forEach(value=>{const td=document.createElement('td');td.textContent=value;tr.append(td)});if(Math.abs(x.price-p)<.001)tr.style.background='#eef6ff';return tr}));
+ const month=num('daily')*30;el('monthly').textContent=money(month);el('sales').textContent=acos>0?money(month/acos):'—';
+}
+function load(data){ids.forEach(id=>{el(id).value=data[id]??defaults[id]});calculate()}
+ids.forEach(id=>el(id).addEventListener('input',calculate));
+el('save').addEventListener('click',()=>{try{localStorage.setItem('amazon-fbm-calculator-v1',JSON.stringify(Object.fromEntries(ids.map(id=>[id,el(id).value]))));el('status').textContent='已保存到当前浏览器。'}catch(e){el('status').textContent='浏览器不允许本地保存；仍可正常计算。'}});
+el('reset').addEventListener('click',()=>{load(defaults);el('status').textContent='已恢复示例；点击“保存当前参数”可覆盖已保存内容。'});
+el('export').addEventListener('click',()=>{const data=[['售价USD','广告前利润USD','广告费USD','广告后利润USD','净利润率%','盈亏平衡ACOS%'],...rows.map(r=>[r.price,r.before,r.ad,r.profit,r.margin,r.break].map(n=>Number.isFinite(n)?n.toFixed(2):''))];const csv='\ufeff'+data.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='amazon-fbm-price-comparison.csv';a.click();URL.revokeObjectURL(url)});
+try{const saved=JSON.parse(localStorage.getItem('amazon-fbm-calculator-v1'));load(saved&&typeof saved==='object'?saved:defaults)}catch(e){load(defaults)}
+</script></body></html>
